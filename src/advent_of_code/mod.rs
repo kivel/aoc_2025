@@ -28,6 +28,73 @@ impl Reader {
 
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
+
+pub struct Grid {
+    pub data: Vec<Vec<char>>,
+    pub rows: usize,
+    pub cols: usize,
+}
+
+#[allow(dead_code)]
+impl Grid {
+    pub fn new(data: Vec<Vec<char>>) -> Self {
+        let rows = data.len();
+        let cols = if rows > 0 { data[0].len() } else { 0 };
+        Grid { data, rows, cols }
+    }
+
+    pub fn from_lines(lines: &Vec<String>) -> Self {
+        let data: Vec<Vec<char>> = lines
+            .iter()
+            .map(|line| line.chars().collect::<Vec<char>>())
+            .collect();
+        Grid::new(data)
+    }
+
+    // find all positions of a given char in the grid
+    pub fn find_char_positions(&self, target: char) -> Vec<(usize, usize)> {
+        let mut positions = Vec::new();
+        for (row_idx, row) in self.data.iter().enumerate() {
+            for (col_idx, &c) in row.iter().enumerate() {
+                if c == target {
+                    positions.push((row_idx, col_idx));
+                }
+            }
+        }
+        positions
+    }
+
+    // get surrounding positions of a given position
+    pub fn get_surrounding_positions(&self, row: usize, col: usize) -> Vec<(usize, usize)> {
+        let mut surrounding = Vec::new();
+        for r in row.saturating_sub(1)..=(row + 1).min(self.rows - 1) {
+            for c in col.saturating_sub(1)..=(col + 1).min(self.cols - 1) {
+                if r != row || c != col {
+                    surrounding.push((r, c));
+                }
+            }
+        }
+        surrounding
+    }
+
+    // get surrounding chars of a given position
+    pub fn get_surrounding_chars(&self, row: usize, col: usize) -> Vec<char> {
+        self.get_surrounding_positions(row, col)
+            .into_iter()
+            .map(|(r, c)| self.data[r][c])
+            .collect()
+    }
+
+    pub fn println(&self) {
+        for row in &self.data {
+            let line_str: String = row.iter().collect();
+            println!("{}", line_str);
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct LimitedVecDeque<T> {
     deque: VecDeque<T>,
     capacity: usize,
