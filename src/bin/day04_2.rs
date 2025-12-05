@@ -23,7 +23,6 @@ fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_
     at_count < 4
 }
 
-// The puzlle calls for two lists (given as two columns in a ascii file) to be sorted and line by line the absolute differences need to be summed up.
 fn puzzle(data: &Vec<String>) -> u32 {
     let start_time = std::time::Instant::now();
     // lines_to_matrix, aka grid
