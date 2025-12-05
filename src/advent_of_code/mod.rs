@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{HashSet, VecDeque};
 use std::fs::File;
 use std::io::BufRead;
 use std::path::Path;
@@ -52,12 +52,12 @@ impl Grid {
     }
 
     // find all positions of a given char in the grid
-    pub fn find_char_positions(&self, target: char) -> Vec<(usize, usize)> {
-        let mut positions = Vec::new();
+    pub fn find_char_positions(&self, target: char) -> HashSet<(usize, usize)> {
+        let mut positions: HashSet<(usize, usize)> = HashSet::new();
         for (row_idx, row) in self.data.iter().enumerate() {
             for (col_idx, &c) in row.iter().enumerate() {
                 if c == target {
-                    positions.push((row_idx, col_idx));
+                    positions.insert((row_idx, col_idx));
                 }
             }
         }

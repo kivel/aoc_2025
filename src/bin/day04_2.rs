@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 #[path = "../advent_of_code/mod.rs"]
 mod advent_of_code;
 
@@ -18,7 +20,7 @@ mod advent_of_code;
 /// 
 /// Returns `true` if the position has fewer than 4 surrounding '@' characters,
 /// making it accessible for removal. Returns `false` otherwise.
-fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_positions: &Vec<(usize, usize)>) -> bool {
+fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_positions: &HashSet<(usize, usize)>) -> bool {
     let surrounding_positions = grid.get_surrounding_positions(row, col);
     let at_count = surrounding_positions.iter()
         .filter(|pos| remaining_positions.contains(pos))
@@ -31,7 +33,7 @@ fn puzzle(data: &Vec<String>) -> u32 {
     // lines_to_matrix, aka grid
     let grid = advent_of_code::Grid::from_lines(&data);
     // find all '@' positions
-    let mut remaining_positions = grid.find_char_positions('@');
+    let mut remaining_positions: HashSet<(usize, usize)> = grid.find_char_positions('@');
     println!("Found <{}> '@'", remaining_positions.len());
     let mut accessible_count = 0;
     
