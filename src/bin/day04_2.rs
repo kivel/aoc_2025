@@ -35,22 +35,26 @@ fn puzzle(data: &Vec<String>) -> u32 {
     
     // Keep removing accessible positions until none are left accessible
     loop {
-        // Find positions that are accessible (less than 4 surrounding '@')
+        // Find and remove accessible positions in one functional step
         let accessible_positions: Vec<(usize, usize)> = remaining_positions.iter()
             .filter(|&&(row, col)| is_accessible(&grid, row, col, &remaining_positions))
             .cloned()
             .collect();
         
         let count = accessible_positions.len();
-        println!("Found <{}> accessible '@'", accessible_count);
+        println!("Found <{}> accessible '@'", count);
         
         // If no positions are accessible, we're done
         if count == 0 {
             break;
         }
+        
         accessible_count += count;
-        // Remove accessible positions from the remaining list
-        remaining_positions.retain(|pos| !accessible_positions.contains(pos));
+        
+        // Remove all accessible positions from the set
+        for pos in accessible_positions {
+            remaining_positions.remove(&pos);
+        }
     }
     
     let final_count = accessible_count;
