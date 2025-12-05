@@ -14,13 +14,18 @@ mod advent_of_code;
 //     count < 4
 // }
 
-// faster version, using Vec and direct contains checks
-fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_positions: &HashSet<(usize, usize)>) -> bool {
+// Returns Some(neighbors) if accessible, None if not accessible
+fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_positions: &HashSet<(usize, usize)>) -> Option<Vec<(usize, usize)>> {
     let surrounding_positions = grid.get_surrounding_positions(row, col);
     let at_count = surrounding_positions.iter()
         .filter(|pos| remaining_positions.contains(pos))
         .count();
-    at_count < 4
+    
+    if at_count < 4 {
+        Some(surrounding_positions)
+    } else {
+        None
+    }
 }
 
 fn puzzle(data: &Vec<String>) -> u32 {
@@ -29,18 +34,25 @@ fn puzzle(data: &Vec<String>) -> u32 {
     let grid = advent_of_code::Grid::from_lines(&data);
     // find all '@' positions
     let mut remaining_positions: HashSet<(usize, usize)> = grid.find_char_positions('@');
+    let mut changed_positions: HashSet<(usize, usize)> = remaining_positions.clone();
     println!("Found <{}> '@'", remaining_positions.len());
     let mut accessible_count = 0;
     
     // Keep removing accessible positions until none are left accessible
     loop {
-        // Find and remove accessible positions in one functional step
-        let accessible_positions: Vec<(usize, usize)> = remaining_positions.iter()
-            .filter(|&&(row, col)| is_accessible(&grid, row, col, &remaining_positions))
-            .cloned()
+        // Functional approach: filter_map to get accessible positions and their neighbors
+        let accessible_with_neighbors: Vec<((usize, usize), Vec<(usize, usize)>)> = changed_positions.iter()
+            .filter_map(|&(row, col)| {
+                if remaining_positions.contains(&(row, col)) {
+                    is_accessible(&grid, row, col, &remaining_positions)
+                        .map(|neighbors| ((row, col), neighbors))
+                } else {
+                    None
+                }
+            })
             .collect();
-        
-        let count = accessible_positions.len();
+
+        let count = accessible_with_neighbors.len();
         println!("Found <{}> accessible '@'", count);
         
         // If no positions are accessible, we're done
@@ -50,10 +62,22 @@ fn puzzle(data: &Vec<String>) -> u32 {
         
         accessible_count += count;
         
-        // Remove all accessible positions from the set
-        for pos in accessible_positions {
-            remaining_positions.remove(&pos);
+        // Collect next changed positions from all neighbors
+        let mut next_changed_positions = HashSet::new();
+        
+        // Remove accessible positions and collect neighbors for next iteration
+        for ((row, col), neighbors) in accessible_with_neighbors {
+            remaining_positions.remove(&(row, col));
+            
+            // Add existing neighbors to next iteration's check list
+            for neighbor in neighbors {
+                if remaining_positions.contains(&neighbor) {
+                    next_changed_positions.insert(neighbor);
+                }
+            }
         }
+        
+        changed_positions = next_changed_positions;
     }
     
     let final_count = accessible_count;
