@@ -21,11 +21,9 @@ mod advent_of_code;
 /// Returns `true` if the position has fewer than 4 surrounding '@' characters,
 /// making it accessible for removal. Returns `false` otherwise.
 fn is_accessible(grid: &advent_of_code::Grid, row: usize, col: usize, remaining_positions: &HashSet<(usize, usize)>) -> bool {
-    let surrounding_positions = grid.get_surrounding_positions(row, col);
-    let at_count = surrounding_positions.iter()
-        .filter(|pos| remaining_positions.contains(pos))
-        .count();
-    at_count < 4
+    let surrounding_positions: HashSet<(usize, usize)> = grid.get_surrounding_positions(row, col).into_iter().collect();
+    let count = remaining_positions.intersection(&surrounding_positions).count();
+    count < 4
 }
 
 // The puzlle calls for two lists (given as two columns in a ascii file) to be sorted and line by line the absolute differences need to be summed up.
