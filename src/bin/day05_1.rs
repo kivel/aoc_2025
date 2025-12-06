@@ -15,12 +15,7 @@ fn parse_u64_pair(s: &str, delimiter: char) -> Option<(u64, u64)> {
 }
 
 fn is_fresh(ingredient: &u64, ranges: &Vec<(u64, u64)>) -> bool {
-    for (min, max) in ranges {
-        if ingredient >= min && ingredient <= max {
-            return true;
-        }
-    }
-    false
+    ranges.iter().any(|(min, max)| ingredient >= min && ingredient <= max)
 }
 
 // The puzlle calls for two lists (given as two columns in a ascii file) to be sorted and line by line the absolute differences need to be summed up.
