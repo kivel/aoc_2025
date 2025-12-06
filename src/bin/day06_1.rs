@@ -7,6 +7,29 @@ enum Operation {
     Multiply,
 }
 
+impl Operation {
+    fn from_str(s: &str) -> Result<Self, String> {
+        match s {
+            "+" => Ok(Operation::Add),
+            "*" => Ok(Operation::Multiply),
+            _ => Err(format!("Unknown operation: {}", s)),
+        }
+    }
+}
+
+// copilot generated those
+impl Operation {
+    fn apply<T>(&self, operand: &Vec<T>) -> T
+    where
+        T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Copy + Default + From<u8>,
+    {
+        match self {
+            Operation::Add => operand.iter().fold(T::default(), |acc, &x| acc + x),
+            Operation::Multiply => operand.iter().fold(T::from(1u8), |acc, &x| acc * x),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 struct Instruction<T> {
     operation: Operation,
@@ -18,10 +41,7 @@ where
     T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Copy + Default + From<u8>,
 {
     fn apply(&self) -> T {
-        match self.operation {
-            Operation::Add => self.operand.iter().fold(T::default(), |acc, &x| acc + x),
-            Operation::Multiply => self.operand.iter().fold(T::from(1u8), |acc, &x| acc * x),
-        }
+        self.operation.apply(&self.operand)
     }
 }
 
@@ -59,25 +79,15 @@ fn puzzle(data: &Vec<String>) -> u64 {
     // transpose the parsed_data for easier column-wise operations
     let transposed_data = transpose_matrix(&parsed_data);
 
-    // empty math instructions vector
-    let mut math: Vec<Instruction<u64>> = vec![];
-    for (idx, op) in op.iter().enumerate() {
-        match *op {
-            "+" => {
-                math.push(Instruction {
-                    operation: Operation::Add,
-                    operand: transposed_data[idx].clone(),
-                });
-            }
-            "*" => {
-                math.push(Instruction {
-                    operation: Operation::Multiply,
-                    operand: transposed_data[idx].clone(),
-                });
-            }
-            _ => panic!("Unknown operation: {}", op),
-        }
-    }
+    // Create instructions functionally
+    let math: Vec<Instruction<u64>> = op
+        .iter()
+        .enumerate()
+        .map(|(idx, op)| Instruction {
+            operation: Operation::from_str(op).unwrap(),
+            operand: transposed_data[idx].clone(),
+        })
+        .collect();
     math.iter().map(|instr| instr.apply()).sum::<u64>()
 }
 
