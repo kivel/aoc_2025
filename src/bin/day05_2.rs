@@ -14,6 +14,8 @@ fn parse_u64_pair(s: &str, delimiter: char) -> Option<(u64, u64)> {
     Some((first_num, second_num))
 }
 
+// Major EBCAK, I need more memory, or have to grow a brain...
+// This takes TB of memory for large ranges...
 fn pair_insert_into_HashSet(pair: (u64, u64), set: &mut HashSet<u64>) {
     for num in pair.0..=pair.1 {
         set.insert(num);
@@ -27,6 +29,7 @@ fn puzzle(data: &Vec<String>) -> usize {
     data.iter()
         .take_while(|line| !line.is_empty())
         .map(|line| parse_u64_pair(&line, '-').unwrap())
+        .inspect(|pair| println!("Inspecting pair before insert: {:?}", pair)) // Side effect here
         .for_each(|pair| pair_insert_into_HashSet(pair, &mut fresh_ranges));
 
     fresh_ranges.len()
