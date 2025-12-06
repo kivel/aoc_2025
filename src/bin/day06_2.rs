@@ -1,6 +1,3 @@
-use core::num;
-use std::iter;
-
 #[path = "../advent_of_code/mod.rs"]
 mod advent_of_code;
 
@@ -87,21 +84,20 @@ fn puzzle(data: &Vec<String>) -> u64 {
         .map(|part| part.chars().collect::<Vec<char>>())
         .inspect(|chars| println!("chars: {:?}", chars))
         .collect::<Vec<Vec<char>>>();
-    // .collect::<Vec<Vec<Vec<char>>>>();
-    println!("parsed_data: {:?}", parsed_data);
 
     // transpose the parsed_data for easier column-wise operations
-    let mut transposed_data = transpose_matrix(&parsed_data);
-    println!("transposed_data: {:?}", transposed_data);
+    let transposed_data = transpose_matrix(&parsed_data);
 
+    // working copy iterator
     let mut iter = transposed_data.clone().into_iter();
-
+    // something to hold the numbers :)
     let mut numbers: Vec<Vec<u64>> = Vec::new();
+    // take each column and convert to numbers until no more numbers are found
+    // the `char_vec_to_int` will return None, which is the column of spaces only --> column separator
     loop {
         let n = iter
             .by_ref()
-            .take_while(|chars| char_vec_to_int(chars).is_some())
-            .map(|chars| char_vec_to_int(&chars).unwrap())
+            .map_while(|chars| char_vec_to_int(&chars))
             .collect::<Vec<u64>>();
         if n.is_empty() {
             break;
@@ -109,7 +105,8 @@ fn puzzle(data: &Vec<String>) -> u64 {
         numbers.push(n);
     }
 
-    // Create instructions functionally
+    // Create instructions functionally, keep fingers crossed that both are of same length
+    // if not, something is wrong with shaping of the input data
     let math: Vec<Instruction<u64>> = op
         .iter()
         .enumerate()
@@ -119,7 +116,6 @@ fn puzzle(data: &Vec<String>) -> u64 {
         })
         .collect();
     math.iter().map(|instr| instr.apply()).sum::<u64>()
-    // 0
 }
 
 fn main() {
