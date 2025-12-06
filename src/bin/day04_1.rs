@@ -14,10 +14,11 @@ fn puzzle(data: &Vec<String>) -> u32 {
     let at_positions = grid.find_char_positions('@');
     println!("Found <{}> '@'", at_positions.len());
     // filter positions directly
-    let accessible_count = at_positions.iter()
+    let accessible_count = at_positions
+        .iter()
         .filter(|&&(row, col)| is_accessible(&grid, row, col))
         .count();
-    
+
     println!("Accessible '@' count: {}", accessible_count);
     accessible_count as u32
 }

@@ -67,26 +67,33 @@ impl Grid {
     // get surrounding positions of a given position
     pub fn get_surrounding_positions(&self, row: usize, col: usize) -> Vec<(usize, usize)> {
         const DELTAS: [(i32, i32); 8] = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1),           (0, 1),
-            (1, -1),  (1, 0),  (1, 1),
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
         ];
-        
+
         let mut surrounding = Vec::with_capacity(8);
         let row_i32 = row as i32;
         let col_i32 = col as i32;
-        
+
         for (dr, dc) in DELTAS {
             let new_row = row_i32 + dr;
             let new_col = col_i32 + dc;
-            
-            if new_row >= 0 && new_col >= 0 
-                && (new_row as usize) < self.rows 
-                && (new_col as usize) < self.cols {
+
+            if new_row >= 0
+                && new_col >= 0
+                && (new_row as usize) < self.rows
+                && (new_col as usize) < self.cols
+            {
                 surrounding.push((new_row as usize, new_col as usize));
             }
         }
-        
+
         surrounding
     }
 

@@ -3,7 +3,7 @@ mod advent_of_code;
 
 fn find_largest_pair(s: &str) -> u32 {
     let digits: Vec<u32> = s.chars().filter_map(|c| c.to_digit(10)).collect();
-    
+
     // Try digits 9 down to 1 as first digit
     for first_digit in (1..=9).rev() {
         if let Some(first_pos) = digits.iter().position(|&d| d == first_digit) {
@@ -20,9 +20,7 @@ fn find_largest_pair(s: &str) -> u32 {
 
 // The puzlle calls for two lists (given as two columns in a ascii file) to be sorted and line by line the absolute differences need to be summed up.
 fn puzzle(data: &Vec<String>) -> u32 {
-    data.iter()
-        .map(|line| find_largest_pair(line))
-        .sum::<u32>()
+    data.iter().map(|line| find_largest_pair(line)).sum::<u32>()
 }
 
 fn main() {
@@ -33,7 +31,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use crate::{advent_of_code, puzzle, find_largest_pair};
+    use crate::{advent_of_code, find_largest_pair, puzzle};
 
     #[test]
     fn test_find_largest_pair() {

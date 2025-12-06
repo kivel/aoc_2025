@@ -6,12 +6,12 @@ fn day01_1(data: &Vec<String>) -> u32 {
     let mut counter: u32 = 0;
     data.iter().for_each(|l| {
         let distance: u32 = l[1..].parse::<u32>().unwrap();
-        if l.starts_with("L"){
+        if l.starts_with("L") {
             dial_position -= distance as i32;
         } else {
             dial_position += distance as i32;
         }
-        if (dial_position % 100)==0 {
+        if (dial_position % 100) == 0 {
             counter += 1;
         }
     });
