@@ -1,5 +1,3 @@
-use std::{collections::HashSet, iter::Enumerate};
-
 #[path = "../advent_of_code/mod.rs"]
 mod advent_of_code;
 
@@ -17,32 +15,38 @@ struct Instruction<T> {
 
 impl<T> Instruction<T>
 where
-    T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Copy + Default,
+    T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Copy + Default + From<u8>,
 {
     fn apply(&self) -> T {
         match self.operation {
             Operation::Add => self.operand.iter().fold(T::default(), |acc, &x| acc + x),
-            Operation::Multiply => self
-                .operand
-                .iter()
-                .skip(1)
-                .fold(self.operand[0], |acc, &x| acc * x),
+            Operation::Multiply => self.operand.iter().fold(T::from(1u8), |acc, &x| acc * x),
         }
     }
 }
 
-// The puzlle calls for two lists (given as two columns in a ascii file) to be sorted and line by line the absolute differences need to be summed up.
-fn puzzle(data: &Vec<String>) -> usize {
-    0
+fn transpose_matrix<T: Copy>(matrix: &Vec<Vec<T>>) -> Vec<Vec<T>> {
+    if matrix.is_empty() {
+        return vec![];
+    }
+    let row_count = matrix.len();
+    let col_count = matrix[0].len();
+    let mut transposed: Vec<Vec<T>> = vec![vec![matrix[0][0]; row_count]; col_count];
+
+    for r in 0..row_count {
+        for c in 0..col_count {
+            transposed[c][r] = matrix[r][c];
+        }
+    }
+    transposed
 }
 
-fn main() {
-    let mut data = advent_of_code::Reader::read_file("./input/day06.txt").unwrap();
-    println!("data lines: {}", data.len());
+fn puzzle(data: &Vec<String>) -> u64 {
+    let mut data = data.clone(); // we need to modify the data
+    // last line contains operations, so lets pop it off and split it by whitespace
     let op = data.pop().unwrap();
     let op = op.split_whitespace().collect::<Vec<&str>>();
-    println!("Last line: {:?}", &op);
-    println!("data lines: {}", data.len());
+
     // parse the remaining lines into u32 after splitting by whitespace
     let parsed_data = data
         .iter()
@@ -52,22 +56,10 @@ fn main() {
                 .collect::<Vec<u64>>() // Collect each line's numbers into Vec<u64>
         })
         .collect::<Vec<Vec<u64>>>();
+    // transpose the parsed_data for easier column-wise operations
+    let transposed_data = transpose_matrix(&parsed_data);
 
-    // transpose the parsed_data
-    let transposed_data: Vec<Vec<u64>> = {
-        let row_count = parsed_data.len();
-        let col_count = parsed_data[0].len();
-        (0..col_count)
-            .map(|col_idx| {
-                (0..row_count)
-                    .map(|row_idx| parsed_data[row_idx][col_idx])
-                    .collect::<Vec<u64>>()
-            })
-            .collect()
-    };
-
-    println!("Parsed data: {:?}", parsed_data);
-    println!("Transposed data: {:?}", transposed_data);
+    // empty math instructions vector
     let mut math: Vec<Instruction<u64>> = vec![];
     for (idx, op) in op.iter().enumerate() {
         match *op {
@@ -86,13 +78,12 @@ fn main() {
             _ => panic!("Unknown operation: {}", op),
         }
     }
-    println!("Instructions: {:?}", math);
-    // let result: u32 = math.iter()
-    //     .map(|instr| instr.apply())
-    //     .collect::<Vec<u32>>()
-    //     .iter()
-    //     .sum::<u32>();
-    let result: u64 = math.iter().map(|instr| instr.apply()).sum();
+    math.iter().map(|instr| instr.apply()).sum::<u64>()
+}
+
+fn main() {
+    let data = advent_of_code::Reader::read_file("./input/day06_test.txt").unwrap();
+    let result = puzzle(&data);
     println!("result: {}", result);
 }
 
@@ -102,17 +93,17 @@ mod tests {
 
     #[test]
     fn puzzle_test_data() {
-        let d = advent_of_code::Reader::read_file("./input/day05_test.txt").unwrap();
+        let d = advent_of_code::Reader::read_file("./input/day06_test.txt").unwrap();
         let result = puzzle(&d);
         println!("result: {result}");
-        assert_eq!(result, 3);
+        assert_eq!(result, 4277556);
     }
 
     #[test]
     fn puzzle_final_data() {
-        let d = advent_of_code::Reader::read_file("./input/day05.txt").unwrap();
+        let d = advent_of_code::Reader::read_file("./input/day06.txt").unwrap();
         let result = puzzle(&d);
         println!("result: {result}");
-        assert_eq!(result, 563);
+        assert_eq!(result, 4693159084994);
     }
 }
