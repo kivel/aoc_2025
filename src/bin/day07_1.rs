@@ -30,8 +30,7 @@ fn puzzle(data: &Vec<String>) -> u32 {
             }
         }
     }
-    // positions.remove(&7);
-    println!("total splits: {}", total_splits);
+
     total_splits
 }
 
