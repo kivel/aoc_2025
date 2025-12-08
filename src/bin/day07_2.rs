@@ -30,9 +30,7 @@ fn puzzle(data: &Vec<String>) -> usize {
     // the last position will be delted, the new timelines will have positions -1 and +1 from the splitter
 
     for (i, splitter) in splitters.iter().enumerate() {
-        println!("processing splitter set {}: {:?}", i + 1, splitter);
         for s in splitter.iter() {
-            // println!("processing splitter at position: {}", s);
             if let Some(timelines_at_s) = timelines.remove(s) {
                 timelines
                     .entry(s + 1)
@@ -43,10 +41,8 @@ fn puzzle(data: &Vec<String>) -> usize {
                     .and_modify(|counter| *counter += timelines_at_s)
                     .or_insert(timelines_at_s);
             }
-            // println!("timelines: {:?}", timelines);
         }
     }
-    println!("final timelines: {:?}", timelines);
     timelines.iter().map(|(_, v)| *v).sum()
     // 0usize
 }
@@ -74,6 +70,6 @@ mod tests {
         let d = advent_of_code::Reader::read_file("./input/day07.txt").unwrap();
         let result = puzzle(&d);
         println!("result: {result}");
-        assert_eq!(result, 1555);
+        assert_eq!(result, 12895232295789);
     }
 }
