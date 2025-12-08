@@ -20,10 +20,10 @@ fn puzzle(data: &Vec<String>) -> usize {
     // each timeline is a unique path from start to end, that's the HashSet inside the Vec
     // The vec contains all timelines with matching tail positions, since timelines can share positions
     // the Mashmap key is the timeline tail position, so we can quickly check if a splitter affects any timelines
-    let mut timelines: HashMap<usize, HashSet<Vec<usize>>> = HashMap::new();
+    let mut timelines: HashMap<usize, usize> = HashMap::new();
     let start_pos = *&data[0].find('S').unwrap();
     // initialize with starting position
-    timelines.insert(start_pos, HashSet::from([vec![]])); // we will put the positions in the HashSet when a splitter is encountered
+    timelines.insert(start_pos, 1); // we will put the positions in the HashSet when a splitter is encountered
     println!("start timelines: {:?}", timelines);
 
     // when a splitter is encountered, each timeline splits into two new timelines
@@ -34,32 +34,21 @@ fn puzzle(data: &Vec<String>) -> usize {
         for s in splitter.iter() {
             // println!("processing splitter at position: {}", s);
             if let Some(timelines_at_s) = timelines.remove(s) {
-                let t: HashSet<Vec<usize>> = timelines_at_s
-                    .into_iter()
-                    .map(|mut positions| {
-                        positions.push(*s);
-                        positions
-                    })
-                    .collect();
-                // println!("timelines at s: {:?}", t);
-                if let Some(left) = timelines.get_mut(&(s - 1)) {
-                    left.extend(t.clone());
-                    // left.insert(t.clone());
-                } else {
-                    timelines.insert(s - 1, t.clone());
-                }
-                if let Some(right) = timelines.get_mut(&(s + 1)) {
-                    right.extend(t.clone());
-                } else {
-                    timelines.insert(s + 1, t.clone());
-                }
+                timelines
+                    .entry(s + 1)
+                    .and_modify(|counter| *counter += timelines_at_s)
+                    .or_insert(timelines_at_s);
+                timelines
+                    .entry(s - 1)
+                    .and_modify(|counter| *counter += timelines_at_s)
+                    .or_insert(timelines_at_s);
             }
             // println!("timelines: {:?}", timelines);
         }
     }
     println!("final timelines: {:?}", timelines);
-    timelines.iter().map(|(_, v)| v.len()).sum()
-    // 0
+    timelines.iter().map(|(_, v)| *v).sum()
+    // 0usize
 }
 
 fn main() {
