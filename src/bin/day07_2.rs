@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 #[path = "../advent_of_code/mod.rs"]
 mod advent_of_code;
 
+// this puzzle is like those pin pyramids where a ball falls down and splits at each fork
 fn puzzle(data: &Vec<String>) -> usize {
     // splitter positions, represented by '^'
     let splitters: Vec<HashSet<usize>> = data
@@ -17,9 +18,7 @@ fn puzzle(data: &Vec<String>) -> usize {
         .collect();
     println!("all splitter positions: {:?}", splitters);
 
-    // each timeline is a unique path from start to end, that's the HashSet inside the Vec
-    // The vec contains all timelines with matching tail positions, since timelines can share positions
-    // the Mashmap key is the timeline tail position, so we can quickly check if a splitter affects any timelines
+    // each timeline is a unique path from start to end, but it's enough to count how many timelines reach each position
     let mut timelines: HashMap<usize, usize> = HashMap::new();
     let start_pos = *&data[0].find('S').unwrap();
     // initialize with starting position
@@ -27,11 +26,13 @@ fn puzzle(data: &Vec<String>) -> usize {
     println!("start timelines: {:?}", timelines);
 
     // when a splitter is encountered, each timeline splits into two new timelines
-    // the last position will be delted, the new timelines will have positions -1 and +1 from the splitter
-
-    for (i, splitter) in splitters.iter().enumerate() {
+    for splitter in splitters {
+        // all splitters in that line
         for s in splitter.iter() {
+            // each splitter position
             if let Some(timelines_at_s) = timelines.remove(s) {
+                // remove the tachion at that position
+                // create two new timelines at s+1 and s-1 (increase counter if already exists)
                 timelines
                     .entry(s + 1)
                     .and_modify(|counter| *counter += timelines_at_s)
