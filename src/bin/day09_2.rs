@@ -143,9 +143,7 @@ fn puzzle(data: &Vec<String>) -> usize {
     let ok_rect = rect_map
         .iter()
         .rev()
-        .skip_while(|(_, r)| {
-            !is_valid_rectangle(r, &vertices)
-        })
+        .skip_while(|(_, r)| !is_valid_rectangle(r, &vertices))
         .next();
     if let Some((area, r)) = ok_rect {
         println!(
