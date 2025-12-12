@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 #[path = "../advent_of_code/mod.rs"]
 mod advent_of_code;
@@ -10,27 +10,37 @@ fn count_paths(
     devices: &HashMap<String, Vec<String>>,
     current: &str,
     target: &str,
-    cache: &mut HashMap<String, usize>,
+    visited: &HashSet<String>, // Nodes visited on this path
+    cache: &mut HashMap<(String, bool, bool), usize>, // (node, has_dac, has_fft) -> count
 ) -> usize {
-    // Base case: reached target
+    let has_dac = visited.contains("dac");
+    let has_fft = visited.contains("fft");
+
+    // Base case: reached target and has both dac and fft
     if current == target {
-        return 1;
+        return if has_dac && has_fft { 1 } else { 0 };
     }
-    // Check cache first
-    if let Some(&cached) = cache.get(current) {
+    // Check cache with state
+    let cache_key = (current.to_string(), has_dac, has_fft);
+    if let Some(&cached) = cache.get(&cache_key) {
         return cached;
     }
     // Get outputs for current node
     let Some(outputs) = devices.get(current) else {
-        cache.insert(current.to_string(), 0);
+        cache.insert(cache_key, 0);
         return 0; // Dead end
     };
+
+    // Add current to visited set
+    let mut new_visited = visited.clone();
+    new_visited.insert(current.to_string());
+
     // Sum paths through all outputs
     let total: usize = outputs
         .iter()
-        .map(|next| count_paths(devices, next, target, cache))
+        .map(|next| count_paths(devices, next, target, &new_visited, cache))
         .sum();
-    cache.insert(current.to_string(), total);
+    cache.insert(cache_key, total);
     total
 }
 
@@ -59,11 +69,12 @@ fn puzzle(data: &Vec<String>) -> usize {
     let devices = devices_from_data(data);
     println!("parsed {} devices", devices.len());
     let mut cache = HashMap::new();
-    count_paths(&devices, "svr", "out", &mut cache)
+    let visited = HashSet::new();
+    count_paths(&devices, "svr", "out", &visited, &mut cache)
 }
 
 fn main() {
-    let data = advent_of_code::Reader::read_file("./input/day11.txt").unwrap();
+    let data = advent_of_code::Reader::read_file("./input/day11_test2.txt").unwrap();
 
     let result = puzzle(&data);
     println!("result: {}", result);
@@ -75,10 +86,10 @@ mod tests {
 
     #[test]
     fn puzzle_test_data() {
-        let d = advent_of_code::Reader::read_file("./input/day11_test.txt").unwrap();
+        let d = advent_of_code::Reader::read_file("./input/day11_test2.txt").unwrap();
         let result = puzzle(&d);
         println!("result: {result}");
-        assert_eq!(result, 5);
+        assert_eq!(result, 2);
     }
 
     #[test]
