@@ -97,6 +97,6 @@ mod tests {
         let d = advent_of_code::Reader::read_file("./input/day11.txt").unwrap();
         let result = puzzle(&d);
         println!("result: {result}");
-        assert_eq!(result, 615);
+        assert_eq!(result, 303012373210128);
     }
 }
